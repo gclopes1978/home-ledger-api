@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/API/">
+    <Project Path="API/HomeLedger.Api/HomeLedger.Api.csproj" />
+    <Project Path="API/HomeLedger.ApiContract/HomeLedger.ApiContract.csproj" />
+  </Folder>
+  <Folder Name="/Business/">
+    <Project Path="Business/HomeLedger.Application/HomeLedger.Application.csproj" />
+    <Project Path="Business/HomeLedger.Domain/HomeLedger.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="Infrastructure/HomeLedger.Infrastructure/HomeLedger.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/HomeLedger.UnitTests/HomeLedger.UnitTests.csproj" />
+    <Project Path="Tests/HomeLedger.IntegrationTests/HomeLedger.IntegrationTests.csproj" />
+  </Folder>
+</Solution>
