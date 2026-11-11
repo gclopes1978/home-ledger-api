@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <BuildArtifactsRoot>$(MSBuildThisFileDirectory)artifacts/windows/</BuildArtifactsRoot>
+    <BaseIntermediateOutputPath>$(BuildArtifactsRoot)obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(BuildArtifactsRoot)bin/$(MSBuildProjectName)/</BaseOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <BuildArtifactsRoot>$(MSBuildThisFileDirectory)artifacts/linux/</BuildArtifactsRoot>
+    <BaseIntermediateOutputPath>$(BuildArtifactsRoot)obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(BuildArtifactsRoot)bin/$(MSBuildProjectName)/</BaseOutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/bin/**;**/obj/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>
