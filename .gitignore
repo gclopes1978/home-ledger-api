@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+**/TestResults/
+.vs/
+*.db
+*.db-shm
+*.db-wal
+/artifacts/
+*.csproj.user
+API/HomeLedger.Api/HomeLedger.Api.http
