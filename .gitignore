@@ -426,3 +426,6 @@ FodyWeavers.xsd
 
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
+/scripts/import_excel.py
+/scripts/requirements-import.txt
+/API/HomeLedger.Api/HomeLedger.Api.http

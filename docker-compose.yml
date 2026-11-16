@@ -1,0 +1,39 @@
+services:
+  database:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    env_file:
+      - path: ./.env
+        required: true
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - home-ledger-sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - path: ./.env
+        required: true
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    ports:
+      - "8081:8080"
+
+volumes:
+  home-ledger-sqlserver-data:

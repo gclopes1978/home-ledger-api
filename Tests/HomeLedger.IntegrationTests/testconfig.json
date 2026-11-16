@@ -1,0 +1,9 @@
+{
+  "platformOptions": {
+    "Coverlet": {
+      "format": "cobertura",
+      "excludeByFile": "**/obj/**/*.cs,**/Migrations/**/*.cs",
+      "exclude": "[HomeLedger.Api]Microsoft.AspNetCore.OpenApi.Generated.*,[HomeLedger.Api]HomeLedger.Api.WeatherForecast*"
+    }
+  }
+}
