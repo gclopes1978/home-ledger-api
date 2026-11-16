@@ -1,5 +1,6 @@
 using HomeLedger.Application.Extensions;
 using HomeLedger.Api.Mapping;
+using HomeLedger.Api.Middleware;
 using HomeLedger.Infrastructure.Data;
 using HomeLedger.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -25,5 +26,6 @@ await using (var scope = app.Services.CreateAsyncScope())
     }
 }
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
+app.UseMiddleware<IdempotencyMiddleware>();
 app.MapControllers();
 await app.RunAsync();
