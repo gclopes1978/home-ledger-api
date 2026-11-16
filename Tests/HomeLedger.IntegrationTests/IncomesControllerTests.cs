@@ -52,7 +52,7 @@ public sealed class IncomesControllerTests
     public async Task Create_GivenAValidIncomeDto_ShouldReturnCreatedIncome()
     {
         await using var context = await ApiTestContext.CreateAsync(TestContext.Current.CancellationToken);
-        var response = await context.Client.PostAsJsonAsync(
+        var response = await context.Client.PostAsJsonWithIdempotencyKeyAsync(
             "/api/incomes",
             new IncomeDto(0, new DateOnly(2026, 2, 1), "Freelance work", 450m),
             cancellationToken: TestContext.Current.CancellationToken);
