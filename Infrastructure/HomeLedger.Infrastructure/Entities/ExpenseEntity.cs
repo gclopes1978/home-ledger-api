@@ -6,7 +6,7 @@ public sealed class ExpenseEntity
 
     public DateOnly Date { get; set; }
 
-    public int LocationId { get; set; }
+    public int SourceId { get; set; }
 
     public int CategoryId { get; set; }
 
@@ -18,7 +18,7 @@ public sealed class ExpenseEntity
 
     public decimal Total { get; set; }
 
-    public LocationEntity? Location { get; set; }
+    public SourceEntity? Source { get; set; }
 
     public CategoryEntity? Category { get; set; }
 
