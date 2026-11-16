@@ -6,7 +6,8 @@ using HomeLedger.Infrastructure.Data.Interfaces.Categories;
 using HomeLedger.Infrastructure.Data.Interfaces.Expenses;
 using HomeLedger.Infrastructure.Data.Interfaces.Groupings;
 using HomeLedger.Infrastructure.Data.Interfaces.Incomes;
-using HomeLedger.Infrastructure.Data.Interfaces.Locations;
+using HomeLedger.Infrastructure.Data.Interfaces.Sources;
+using HomeLedger.Infrastructure.Data.Interfaces.Idempotency;
 using HomeLedger.Infrastructure.Data.Interfaces.PaymentTypes;
 using HomeLedger.Infrastructure.Data.Repositories;
 using HomeLedger.Infrastructure.Mapping;
@@ -25,17 +26,19 @@ public static class DependencyInjection
 
         services.AddScoped<ICategoryData, CategoryData>();
         services.AddScoped<IGroupingData, GroupingData>();
-        services.AddScoped<ILocationData, LocationData>();
+        services.AddScoped<ISourceData, SourceData>();
         services.AddScoped<IExpenseData, ExpenseData>();
         services.AddScoped<IIncomeData, IncomeData>();
         services.AddScoped<IPaymentTypeData, PaymentTypeData>();
+        services.AddScoped<IIdempotencyData, IdempotencyRecordData>();
 
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IGroupingRepository, GroupingRepository>();
-        services.AddScoped<ILocationRepository, LocationRepository>();
+        services.AddScoped<ISourceRepository, SourceRepository>();
         services.AddScoped<IExpenseRepository, ExpenseRepository>();
         services.AddScoped<IIncomeRepository, IncomeRepository>();
         services.AddScoped<IPaymentTypeRepository, PaymentTypeRepository>();
+        services.AddScoped<IIdempotencyRepository, IdempotencyRepository>();
         return services;
     }
 }
