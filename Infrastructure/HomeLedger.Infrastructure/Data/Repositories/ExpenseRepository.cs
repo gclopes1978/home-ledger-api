@@ -2,6 +2,7 @@ using AutoMapper;
 using HomeLedger.Domain.BusinessModels;
 using HomeLedger.Domain.Interfaces.Repositories;
 using HomeLedger.Infrastructure.Data.Interfaces.Expenses;
+using HomeLedger.Infrastructure.Data.Transactions;
 using HomeLedger.Infrastructure.Entities;
 
 namespace HomeLedger.Infrastructure.Data.Repositories;
@@ -33,32 +34,43 @@ public sealed class ExpenseRepository(
 
     public async Task<Expense> InsertAsync(Expense model, CancellationToken ct)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        await using var transaction =
+            await RepositoryTransaction.BeginAsync(db, ct);
+
         try
         {
             var entity = mapper.Map<ExpenseEntity>(model);
             var insertedEntity = await data.InsertAsync(entity, ct);
+
             await transaction.CommitAsync(ct);
+
             return mapper.Map<Expense>(insertedEntity);
         }
         catch
         {
-            await transaction.RollbackAsync(ct);
+            await transaction.RollbackAsync(CancellationToken.None);
             throw;
         }
     }
 
-    public async Task<bool> UpdateAsync(int id, Expense model, CancellationToken ct)
+    public async Task<bool> UpdateAsync(
+        int id,
+        Expense model,
+        CancellationToken ct)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        await using var transaction =
+            await RepositoryTransaction.BeginAsync(db, ct);
+
         try
         {
             model.Id = id;
+
             var entity = mapper.Map<ExpenseEntity>(model);
             var updated = await data.UpdateAsync(id, entity, ct);
+
             if (!updated)
             {
-                await transaction.RollbackAsync(ct);
+                await transaction.RollbackAsync(CancellationToken.None);
                 return false;
             }
 
@@ -67,20 +79,23 @@ public sealed class ExpenseRepository(
         }
         catch
         {
-            await transaction.RollbackAsync(ct);
+            await transaction.RollbackAsync(CancellationToken.None);
             throw;
         }
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        await using var transaction =
+            await RepositoryTransaction.BeginAsync(db, ct);
+
         try
         {
             var deleted = await data.DeleteAsync(id, ct);
+
             if (!deleted)
             {
-                await transaction.RollbackAsync(ct);
+                await transaction.RollbackAsync(CancellationToken.None);
                 return false;
             }
 
@@ -89,7 +104,7 @@ public sealed class ExpenseRepository(
         }
         catch
         {
-            await transaction.RollbackAsync(ct);
+            await transaction.RollbackAsync(CancellationToken.None);
             throw;
         }
     }
