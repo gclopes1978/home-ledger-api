@@ -6,10 +6,11 @@ public sealed class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> op
 {
     public DbSet<CategoryEntity> Categories => Set<CategoryEntity>();
     public DbSet<GroupingEntity> Groupings => Set<GroupingEntity>();
-    public DbSet<LocationEntity> Locations => Set<LocationEntity>();
+    public DbSet<SourceEntity> Sources => Set<SourceEntity>();
     public DbSet<ExpenseEntity> Expenses => Set<ExpenseEntity>();
     public DbSet<IncomeEntity> Incomes => Set<IncomeEntity>();
     public DbSet<PaymentTypeEntity> PaymentTypes => Set<PaymentTypeEntity>();
+    public DbSet<IdempotencyRecordEntity> IdempotencyRecords => Set<IdempotencyRecordEntity>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         var category = modelBuilder.Entity<CategoryEntity>();
@@ -24,12 +25,12 @@ public sealed class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> op
             .HasMaxLength(150)
             .IsRequired();
 
-        var location = modelBuilder.Entity<LocationEntity>();
-        location.ToTable("Locations");
-        location.Property(x => x.Name)
+        var source = modelBuilder.Entity<SourceEntity>();
+        source.ToTable("Sources");
+        source.Property(x => x.Name)
             .HasMaxLength(150)
             .IsRequired();
-        location.Property(x => x.Description)
+        source.Property(x => x.Description)
             .HasMaxLength(500);
 
         var income = modelBuilder.Entity<IncomeEntity>();
@@ -51,11 +52,25 @@ public sealed class HomeLedgerDbContext(DbContextOptions<HomeLedgerDbContext> op
             .HasForeignKey(x => x.GroupingId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        var idempotencyRecord = modelBuilder.Entity<IdempotencyRecordEntity>();
+        idempotencyRecord.ToTable("IdempotencyRecords");
+        idempotencyRecord.Property(x => x.IdempotencyKey)
+            .HasMaxLength(128)
+            .IsRequired();
+        idempotencyRecord.Property(x => x.RequestHash)
+            .HasMaxLength(64)
+            .IsRequired();
+        idempotencyRecord.Property(x => x.ResponseContentType)
+            .HasMaxLength(200);
+        idempotencyRecord.Property(x => x.ResponseLocation)
+            .HasMaxLength(2048);
+        idempotencyRecord.HasIndex(x => x.IdempotencyKey)
+            .IsUnique();
         var expense = modelBuilder.Entity<ExpenseEntity>();
         expense.ToTable("Expenses");
-        expense.HasOne(x => x.Location)
+        expense.HasOne(x => x.Source)
             .WithMany()
-            .HasForeignKey(x => x.LocationId)
+            .HasForeignKey(x => x.SourceId)
             .OnDelete(DeleteBehavior.Restrict);
         expense.HasOne(x => x.Category)
             .WithMany()
