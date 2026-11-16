@@ -39,7 +39,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
         db.Groupings.Add(GroupingStub.Create());
         db.Categories.Add(CategoryStub.Create());
-        db.Locations.Add(LocationStub.Create());
+        db.Sources.Add(SourceStub.Create());
         db.PaymentTypes.Add(PaymentTypeStub.Create());
         db.Expenses.AddRange(
             ExpenseStub.Create(),
