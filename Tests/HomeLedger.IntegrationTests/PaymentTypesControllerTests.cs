@@ -36,7 +36,7 @@ public sealed class PaymentTypesControllerTests
     public async Task Create_GivenAValidPaymentTypeDto_ShouldReturnCreatedPaymentType()
     {
         await using var context = await ApiTestContext.CreateAsync(TestContext.Current.CancellationToken);
-        var response = await context.Client.PostAsJsonAsync(
+        var response = await context.Client.PostAsJsonWithIdempotencyKeyAsync(
             "/api/paymenttypes",
             new PaymentTypeDto(0, "Cash"),
             cancellationToken: TestContext.Current.CancellationToken);
