@@ -19,8 +19,8 @@ public sealed class ExpensesControllerTests
         var expense = expenses.Should().ContainSingle(item => item.Id == 1).Subject;
         expense.Category.Should().BeEquivalentTo(
             new CategoryDto(1, "Groceries", 1, new GroupingDto(1, "Home")));
-        expense.Location.Should().BeEquivalentTo(
-            new LocationDto(1, "Local Market", "Integration test location"));
+        expense.Source.Should().BeEquivalentTo(
+            new SourceDto(1, "Local Market", "Integration test source"));
         expense.PaymentType.Should().BeEquivalentTo(new PaymentTypeDto(1, "Debit card"));
     }
 
@@ -52,8 +52,8 @@ public sealed class ExpensesControllerTests
         expense!.Total.Should().Be(20m);
         expense.Category.Should().BeEquivalentTo(
             new CategoryDto(1, "Groceries", 1, new GroupingDto(1, "Home")));
-        expense.Location.Should().BeEquivalentTo(
-            new LocationDto(1, "Local Market", "Integration test location"));
+        expense.Source.Should().BeEquivalentTo(
+            new SourceDto(1, "Local Market", "Integration test source"));
         expense.PaymentType.Should().BeEquivalentTo(new PaymentTypeDto(1, "Debit card"));
         (await context.Client.GetAsync("/api/expenses/999", TestContext.Current.CancellationToken)).StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -62,7 +62,7 @@ public sealed class ExpensesControllerTests
     public async Task Create_GivenAValidExpenseDto_ShouldReturnCreatedExpense()
     {
         await using var context = await ApiTestContext.CreateAsync(TestContext.Current.CancellationToken);
-        var response = await context.Client.PostAsJsonAsync(
+        var response = await context.Client.PostAsJsonWithIdempotencyKeyAsync(
             "/api/expenses",
             new ExpenseDto(0, new DateOnly(2026, 2, 1), 1, 1, 1, 18m, 3m, 15m),
             cancellationToken: TestContext.Current.CancellationToken);
@@ -72,8 +72,8 @@ public sealed class ExpensesControllerTests
         expense!.Total.Should().Be(15m);
         expense.Category.Should().BeEquivalentTo(
             new CategoryDto(1, "Groceries", 1, new GroupingDto(1, "Home")));
-        expense.Location.Should().BeEquivalentTo(
-            new LocationDto(1, "Local Market", "Integration test location"));
+        expense.Source.Should().BeEquivalentTo(
+            new SourceDto(1, "Local Market", "Integration test source"));
         expense.PaymentType.Should().BeEquivalentTo(new PaymentTypeDto(1, "Debit card"));
     }
 
