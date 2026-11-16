@@ -9,10 +9,11 @@ public static class DependencyInjection
     {
         services.AddScoped<ICategoryUseCase, CategoryUseCase>();
         services.AddScoped<IGroupingUseCase, GroupingUseCase>();
-        services.AddScoped<ILocationUseCase, LocationUseCase>();
+        services.AddScoped<ISourceUseCase, SourceUseCase>();
         services.AddScoped<IExpenseUseCase, ExpenseUseCase>();
         services.AddScoped<IIncomeUseCase, IncomeUseCase>();
         services.AddScoped<IPaymentTypeUseCase, PaymentTypeUseCase>();
+        services.AddScoped<IIdempotencyUseCase, IdempotencyUseCase>();
         return services;
     }
 }
