@@ -26,7 +26,7 @@ public sealed class ExpenseUseCaseTests
         result.Should().BeSameAs(list);
         result.Should().ContainSingle();
         result[0].Category.Should().BeEquivalentTo(model.Category);
-        result[0].Location.Should().BeEquivalentTo(model.Location);
+        result[0].Source.Should().BeEquivalentTo(model.Source);
         result[0].PaymentType.Should().BeEquivalentTo(model.PaymentType);
         repository.Verify(x => x.GetAllAsync(startDate, endDate, cancellationToken), Times.Once);
     }
@@ -44,7 +44,7 @@ public sealed class ExpenseUseCaseTests
 
         result.Should().BeSameAs(model);
         result.Category.Should().BeEquivalentTo(model.Category);
-        result.Location.Should().BeEquivalentTo(model.Location);
+        result.Source.Should().BeEquivalentTo(model.Source);
         result.PaymentType.Should().BeEquivalentTo(model.PaymentType);
         repository.Verify(x => x.GetAsync(1, cancellationToken), Times.Once);
     }
@@ -62,7 +62,7 @@ public sealed class ExpenseUseCaseTests
 
         result.Should().BeSameAs(model);
         result.Category.Should().BeEquivalentTo(model.Category);
-        result.Location.Should().BeEquivalentTo(model.Location);
+        result.Source.Should().BeEquivalentTo(model.Source);
         result.PaymentType.Should().BeEquivalentTo(model.PaymentType);
         repository.Verify(x => x.InsertAsync(model, cancellationToken), Times.Once);
     }
@@ -98,7 +98,7 @@ public sealed class ExpenseUseCaseTests
         {
             Id = 1,
             Date = new(2026, 1, 1),
-            LocationId = 2,
+            SourceId = 2,
             CategoryId = 3,
             PaymentTypeId = 5,
             PurchaseAmount = 10m,
@@ -111,7 +111,7 @@ public sealed class ExpenseUseCaseTests
                 GroupingId = 4,
                 Grouping = new Grouping { Id = 4, Name = "Home" }
             },
-            Location = new Location
+            Source = new Source
             {
                 Id = 2,
                 Name = "Local Market",
