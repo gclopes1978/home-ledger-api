@@ -8,3 +8,9 @@
 /artifacts/
 *.csproj.user
 API/HomeLedger.Api/HomeLedger.Api.http
+.env
+.env.*
+!.env.example
+/scripts/__pycache__/import_excel.cpython-312.pyc
+/scripts/import_excel.py
+/scripts/requirements-import.txt
