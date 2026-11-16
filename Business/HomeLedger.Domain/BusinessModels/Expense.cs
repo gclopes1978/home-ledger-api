@@ -6,7 +6,7 @@ public sealed class Expense
 
     public DateOnly Date { get; set; }
 
-    public int LocationId { get; set; }
+    public int SourceId { get; set; }
 
     public int CategoryId { get; set; }
 
@@ -20,7 +20,7 @@ public sealed class Expense
 
     public Category? Category { get; set; }
 
-    public Location? Location { get; set; }
+    public Source? Source { get; set; }
 
     public PaymentType? PaymentType { get; set; }
 }
