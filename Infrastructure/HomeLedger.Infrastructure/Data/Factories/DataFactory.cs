@@ -6,6 +6,8 @@ namespace HomeLedger.Infrastructure.Data.Factories;
 public abstract class DataFactory<TEntity>(HomeLedgerDbContext db) : IData<TEntity>
     where TEntity : class
 {
+    protected HomeLedgerDbContext DbContext => db;
+
     protected DbSet<TEntity> Entities
     {
         get
