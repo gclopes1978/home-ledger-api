@@ -13,11 +13,11 @@ public sealed class ApiMappingProfile : Profile
         CreateMap<Category, CategoryDto>();
 
         CreateMap<GroupingDto, Grouping>().ReverseMap();
-        CreateMap<LocationDto, Location>().ReverseMap();
+        CreateMap<SourceDto, Source>().ReverseMap();
 
         CreateMap<ExpenseDto, Expense>()
             .ForMember(destination => destination.Category, options => options.Ignore())
-            .ForMember(destination => destination.Location, options => options.Ignore())
+            .ForMember(destination => destination.Source, options => options.Ignore())
             .ForMember(destination => destination.PaymentType, options => options.Ignore());
         CreateMap<Expense, ExpenseDto>();
 
