@@ -27,15 +27,15 @@ internal static class GroupingStub
     }
 }
 
-internal static class LocationStub
+internal static class SourceStub
 {
-    public static LocationEntity Create()
+    public static SourceEntity Create()
     {
-        return new LocationEntity
+        return new SourceEntity
         {
             Id = 1,
             Name = "Local Market",
-            Description = "Integration test location"
+            Description = "Integration test source"
         };
     }
 }
@@ -48,7 +48,7 @@ internal static class ExpenseStub
         {
             Id = id,
             Date = date ?? new DateOnly(2026, 1, 1),
-            LocationId = 1,
+            SourceId = 1,
             CategoryId = 1,
             PaymentTypeId = 1,
             PurchaseAmount = 25m,
