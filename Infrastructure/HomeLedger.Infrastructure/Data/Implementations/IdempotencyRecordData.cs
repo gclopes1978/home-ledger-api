@@ -50,7 +50,7 @@ public sealed class IdempotencyRecordData(HomeLedgerDbContext db)
         string idempotencyKey,
         int responseStatusCode,
         string? responseContentType,
-        string? responseLocation,
+        string? responseSource,
         string responseBody,
         CancellationToken ct)
     {
@@ -59,7 +59,7 @@ public sealed class IdempotencyRecordData(HomeLedgerDbContext db)
                 $"The idempotency record '{idempotencyKey}' was not found.");
         record.ResponseStatusCode = responseStatusCode;
         record.ResponseContentType = responseContentType;
-        record.ResponseLocation = responseLocation;
+        record.ResponseLocation = responseSource;
         record.ResponseBody = responseBody;
 
         await DbContext.SaveChangesAsync(ct);
