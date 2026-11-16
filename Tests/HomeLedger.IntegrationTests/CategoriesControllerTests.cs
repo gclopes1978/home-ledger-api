@@ -38,7 +38,7 @@ public sealed class CategoriesControllerTests
     public async Task Create_GivenAValidCategoryDto_ShouldReturnCreatedCategory()
     {
         await using var context = await ApiTestContext.CreateAsync(TestContext.Current.CancellationToken);
-        var response = await context.Client.PostAsJsonAsync("/api/categories", new CategoryDto(0, "Utilities", 1),
+        var response = await context.Client.PostAsJsonWithIdempotencyKeyAsync("/api/categories", new CategoryDto(0, "Utilities", 1),
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
