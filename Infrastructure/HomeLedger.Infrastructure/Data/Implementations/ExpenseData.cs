@@ -51,7 +51,7 @@ public sealed class ExpenseData(HomeLedgerDbContext db)
             .AsNoTracking()
             .Include(expense => expense.Category)
                 .ThenInclude(category => category!.Grouping)
-            .Include(expense => expense.Location)
+            .Include(expense => expense.Source)
             .Include(expense => expense.PaymentType);
     }
 }
