@@ -36,7 +36,7 @@ public sealed class GroupingsControllerTests
     public async Task Create_GivenAValidGroupingDto_ShouldReturnCreatedGrouping()
     {
         await using var context = await ApiTestContext.CreateAsync(TestContext.Current.CancellationToken);
-        var response = await context.Client.PostAsJsonAsync(
+        var response = await context.Client.PostAsJsonWithIdempotencyKeyAsync(
             "/api/groupings",
             new GroupingDto(0, "Transport"),
             cancellationToken: TestContext.Current.CancellationToken);
