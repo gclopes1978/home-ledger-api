@@ -10,6 +10,8 @@ public sealed class IdempotencyMiddleware(
     RequestDelegate next,
     ILogger<IdempotencyMiddleware> logger)
 {
+    private const int MaximumResponseBodySize = 65_536; // 64 KB
+
     private const long MaximumRequestBodySize = 1_048_576;
     private const int BufferSize = 81_920;
 
@@ -49,7 +51,8 @@ public sealed class IdempotencyMiddleware(
         };
 
         var originalResponseBody = context.Response.Body;
-        await using var responseBuffer = new MemoryStream();
+        await using var responseBuffer = new BoundedMemoryStream(
+    MaximumResponseBodySize);
 
         var keyReserved = false;
 
@@ -71,6 +74,14 @@ public sealed class IdempotencyMiddleware(
                     context.Response.Body = responseBuffer;
 
                     await next(context);
+
+                    if (responseBuffer.Length > MaximumResponseBodySize)
+                    {
+                        context.Response.Clear();
+
+                        throw new InvalidOperationException(
+                            $"The response body exceeds the maximum allowed size of {MaximumResponseBodySize} bytes.");
+                    }
 
                     responseBuffer.Position = 0;
 
@@ -291,5 +302,76 @@ public sealed class IdempotencyMiddleware(
                 title: "Idempotency conflict.",
                 detail: detail)
             .ExecuteAsync(context);
+    }
+    private sealed class BoundedMemoryStream(int maximumLength) : MemoryStream
+    {
+        private void EnsureCapacityForWrite(long count)
+        {
+            var resultingLength = Math.Max(
+                Length,
+                checked(Position + count));
+
+            if (resultingLength > maximumLength)
+            {
+                throw new InvalidOperationException(
+                    $"The response body exceeds the maximum allowed size of {maximumLength} bytes.");
+            }
+        }
+
+        public override void Write(
+            byte[] buffer,
+            int offset,
+            int count)
+        {
+            EnsureCapacityForWrite(count);
+            base.Write(buffer, offset, count);
+        }
+
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            EnsureCapacityForWrite(buffer.Length);
+            base.Write(buffer);
+        }
+
+        public override Task WriteAsync(
+            byte[] buffer,
+            int offset,
+            int count,
+            CancellationToken cancellationToken)
+        {
+            EnsureCapacityForWrite(count);
+
+            return base.WriteAsync(
+                buffer,
+                offset,
+                count,
+                cancellationToken);
+        }
+
+        public override ValueTask WriteAsync(
+            ReadOnlyMemory<byte> buffer,
+            CancellationToken cancellationToken = default)
+        {
+            EnsureCapacityForWrite(buffer.Length);
+
+            return base.WriteAsync(buffer, cancellationToken);
+        }
+
+        public override void WriteByte(byte value)
+        {
+            EnsureCapacityForWrite(1);
+            base.WriteByte(value);
+        }
+
+        public override void SetLength(long value)
+        {
+            if (value > maximumLength)
+            {
+                throw new InvalidOperationException(
+                    $"The response body exceeds the maximum allowed size of {maximumLength} bytes.");
+            }
+
+            base.SetLength(value);
+        }
     }
 }
