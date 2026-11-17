@@ -28,7 +28,7 @@ public sealed class PaymentTypesControllerTests
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         paymentType.Should().NotBeNull();
-        paymentType!.Description.Should().Be("Debit card");
+        paymentType.Description.Should().Be("Debit card");
         (await context.Client.GetAsync("/api/paymenttypes/999", TestContext.Current.CancellationToken)).StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -64,6 +64,7 @@ public sealed class PaymentTypesControllerTests
     public async Task Delete_GivenExistingAndDeletedIds_ShouldReturnNoContentAndNotFound()
     {
         await using var context = await ApiTestContext.CreateAsync(TestContext.Current.CancellationToken);
+        await context.DeleteAllExpensesAsync(TestContext.Current.CancellationToken);
         var response = await context.Client.DeleteAsync("/api/paymenttypes/1", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
