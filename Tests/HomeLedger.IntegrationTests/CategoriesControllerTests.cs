@@ -62,10 +62,21 @@ public sealed class CategoriesControllerTests
     [Fact]
     public async Task Delete_GivenExistingAndDeletedIds_ShouldReturnNoContentAndNotFound()
     {
-        await using var context = await ApiTestContext.CreateAsync(TestContext.Current.CancellationToken);
-        var response = await context.Client.DeleteAsync("/api/categories/1", TestContext.Current.CancellationToken);
+        await using var context = await ApiTestContext.CreateAsync(
+            TestContext.Current.CancellationToken);
+
+        await context.DeleteAllExpensesAsync(
+            TestContext.Current.CancellationToken);
+
+        var response = await context.Client.DeleteAsync(
+            "/api/categories/1",
+            TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await context.Client.DeleteAsync("/api/categories/1", TestContext.Current.CancellationToken)).StatusCode.Should().Be(HttpStatusCode.NotFound);
+
+        (await context.Client.DeleteAsync(
+            "/api/categories/1",
+            TestContext.Current.CancellationToken))
+            .StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }
