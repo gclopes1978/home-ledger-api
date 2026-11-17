@@ -28,7 +28,7 @@ public sealed class GroupingsControllerTests
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         grouping.Should().NotBeNull();
-        grouping!.Name.Should().Be("Home");
+        grouping.Name.Should().Be("Home");
         (await context.Client.GetAsync("/api/groupings/999", TestContext.Current.CancellationToken)).StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -64,6 +64,8 @@ public sealed class GroupingsControllerTests
     public async Task Delete_GivenExistingAndDeletedIds_ShouldReturnNoContentAndNotFound()
     {
         await using var context = await ApiTestContext.CreateAsync(TestContext.Current.CancellationToken);
+        await context.DeleteAllExpensesAsync(TestContext.Current.CancellationToken);
+        await context.DeleteAllCategoriesAsync(TestContext.Current.CancellationToken);
         var response = await context.Client.DeleteAsync("/api/groupings/1", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);

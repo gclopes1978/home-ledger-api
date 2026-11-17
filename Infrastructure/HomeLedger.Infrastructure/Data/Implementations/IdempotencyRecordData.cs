@@ -1,6 +1,7 @@
 using HomeLedger.Infrastructure.Data.Factories;
 using HomeLedger.Infrastructure.Data.Interfaces.Idempotency;
 using HomeLedger.Infrastructure.Entities;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace HomeLedger.Infrastructure.Data.Implementations;
@@ -24,16 +25,23 @@ public sealed class IdempotencyRecordData(HomeLedgerDbContext db)
             await DbContext.SaveChangesAsync(ct);
             return true;
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException exception)
         {
             DbContext.Entry(entity).State = EntityState.Detached;
 
-            if (await GetByKeyAsync(entity.IdempotencyKey, ct) is not null)
+            if (!IsUniqueConstraintViolation(exception))
             {
-                return false;
+                throw;
             }
 
-            throw;
+            var existing = await GetByKeyAsync(entity.IdempotencyKey, ct);
+
+            if (existing is null)
+            {
+                throw;
+            }
+
+            return false;
         }
     }
 
@@ -43,32 +51,42 @@ public sealed class IdempotencyRecordData(HomeLedgerDbContext db)
     {
         return await Entities
             .AsNoTracking()
-            .SingleOrDefaultAsync(record => record.IdempotencyKey == idempotencyKey, ct);
+            .SingleOrDefaultAsync(
+                record => record.IdempotencyKey == idempotencyKey,
+                ct);
     }
 
     public async Task CompleteAsync(
         string idempotencyKey,
         int responseStatusCode,
         string? responseContentType,
-        string? responseLocation,
+        string? responseSource,
         string responseBody,
         CancellationToken ct)
     {
         var record = await Entities
-            .SingleOrDefaultAsync(entry => entry.IdempotencyKey == idempotencyKey, ct) ?? throw new InvalidOperationException(
+            .SingleOrDefaultAsync(
+                entry => entry.IdempotencyKey == idempotencyKey,
+                ct)
+            ?? throw new InvalidOperationException(
                 $"The idempotency record '{idempotencyKey}' was not found.");
+
         record.ResponseStatusCode = responseStatusCode;
         record.ResponseContentType = responseContentType;
-        record.ResponseLocation = responseLocation;
+        record.ResponseLocation = responseSource;
         record.ResponseBody = responseBody;
 
         await DbContext.SaveChangesAsync(ct);
     }
 
-    public async Task DeleteByKeyAsync(string idempotencyKey, CancellationToken ct)
+    public async Task DeleteByKeyAsync(
+        string idempotencyKey,
+        CancellationToken ct)
     {
         var record = await Entities
-            .SingleOrDefaultAsync(entry => entry.IdempotencyKey == idempotencyKey, ct);
+            .SingleOrDefaultAsync(
+                entry => entry.IdempotencyKey == idempotencyKey,
+                ct);
 
         if (record is null)
         {
@@ -77,5 +95,13 @@ public sealed class IdempotencyRecordData(HomeLedgerDbContext db)
 
         Entities.Remove(record);
         await DbContext.SaveChangesAsync(ct);
+    }
+
+    private static bool IsUniqueConstraintViolation(
+        DbUpdateException exception)
+    {
+        return exception.GetBaseException() is SqlException sqlException
+            && (sqlException.Number == 2601
+                || sqlException.Number == 2627);
     }
 }

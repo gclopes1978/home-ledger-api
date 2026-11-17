@@ -2,6 +2,7 @@ using AutoMapper;
 using HomeLedger.Domain.BusinessModels;
 using HomeLedger.Domain.Interfaces.Repositories;
 using HomeLedger.Infrastructure.Data.Interfaces.Incomes;
+using HomeLedger.Infrastructure.Data.Transactions;
 using HomeLedger.Infrastructure.Entities;
 
 namespace HomeLedger.Infrastructure.Data.Repositories;
@@ -33,32 +34,43 @@ public sealed class IncomeRepository(
 
     public async Task<Income> InsertAsync(Income model, CancellationToken ct)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        await using var transaction =
+            await RepositoryTransaction.BeginAsync(db, ct);
+
         try
         {
             var entity = mapper.Map<IncomeEntity>(model);
             var insertedEntity = await data.InsertAsync(entity, ct);
+
             await transaction.CommitAsync(ct);
+
             return mapper.Map<Income>(insertedEntity);
         }
         catch
         {
-            await transaction.RollbackAsync(ct);
+            await transaction.RollbackAsync(CancellationToken.None);
             throw;
         }
     }
 
-    public async Task<bool> UpdateAsync(int id, Income model, CancellationToken ct)
+    public async Task<bool> UpdateAsync(
+        int id,
+        Income model,
+        CancellationToken ct)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        await using var transaction =
+            await RepositoryTransaction.BeginAsync(db, ct);
+
         try
         {
             model.Id = id;
+
             var entity = mapper.Map<IncomeEntity>(model);
             var updated = await data.UpdateAsync(id, entity, ct);
+
             if (!updated)
             {
-                await transaction.RollbackAsync(ct);
+                await transaction.RollbackAsync(CancellationToken.None);
                 return false;
             }
 
@@ -67,20 +79,23 @@ public sealed class IncomeRepository(
         }
         catch
         {
-            await transaction.RollbackAsync(ct);
+            await transaction.RollbackAsync(CancellationToken.None);
             throw;
         }
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        await using var transaction =
+            await RepositoryTransaction.BeginAsync(db, ct);
+
         try
         {
             var deleted = await data.DeleteAsync(id, ct);
+
             if (!deleted)
             {
-                await transaction.RollbackAsync(ct);
+                await transaction.RollbackAsync(CancellationToken.None);
                 return false;
             }
 
@@ -89,7 +104,7 @@ public sealed class IncomeRepository(
         }
         catch
         {
-            await transaction.RollbackAsync(ct);
+            await transaction.RollbackAsync(CancellationToken.None);
             throw;
         }
     }
