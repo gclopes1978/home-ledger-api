@@ -6,5 +6,5 @@ public sealed class GroupingEntity
 
     public required string Name { get; set; }
 
-    public ICollection<CategoryEntity> Categories { get; set; } = new List<CategoryEntity>();
+    public ICollection<CategoryEntity> Categories { get; set; } = [];
 }
