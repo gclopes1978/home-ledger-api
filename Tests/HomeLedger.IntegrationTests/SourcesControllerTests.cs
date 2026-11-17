@@ -28,7 +28,7 @@ public sealed class SourcesControllerTests
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         source.Should().NotBeNull();
-        source!.Name.Should().Be("Local Market");
+        source.Name.Should().Be("Local Market");
         (await context.Client.GetAsync("/api/sources/999", TestContext.Current.CancellationToken)).StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -64,9 +64,69 @@ public sealed class SourcesControllerTests
     public async Task Delete_GivenExistingAndDeletedIds_ShouldReturnNoContentAndNotFound()
     {
         await using var context = await ApiTestContext.CreateAsync(TestContext.Current.CancellationToken);
+        await context.DeleteAllExpensesAsync(TestContext.Current.CancellationToken);
         var response = await context.Client.DeleteAsync("/api/sources/1", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         (await context.Client.DeleteAsync("/api/sources/1", TestContext.Current.CancellationToken)).StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Create_GivenResponseExceedsMaximumSize_ShouldRollbackAndAllowRetry()
+    {
+        await using var context = await ApiTestContext.CreateAsync(
+            TestContext.Current.CancellationToken);
+
+        const string idempotencyKey = "oversized-source-response";
+
+        var oversizedSource = new SourceDto(
+            0,
+            "Oversized Source",
+            new string('A', 70_000));
+
+        using var oversizedRequest = new HttpRequestMessage(
+            HttpMethod.Post,
+            "/api/sources")
+        {
+            Content = JsonContent.Create(oversizedSource)
+        };
+
+        oversizedRequest.Headers.Add("Idempotency-Key", idempotencyKey);
+
+        using var oversizedResponse = await context.Client.SendAsync(
+            oversizedRequest,
+            TestContext.Current.CancellationToken);
+
+        oversizedResponse.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+
+        var sourcesAfterFailure = await context.Client.GetFromJsonAsync<List<SourceDto>>(
+            "/api/sources",
+            TestContext.Current.CancellationToken);
+
+        sourcesAfterFailure.Should().NotContain(
+            source => source.Name == "Oversized Source");
+
+        using var retryRequest = new HttpRequestMessage(
+            HttpMethod.Post,
+            "/api/sources")
+        {
+            Content = JsonContent.Create(
+                new SourceDto(0, "Oversized Source", "Valid description"))
+        };
+
+        retryRequest.Headers.Add("Idempotency-Key", idempotencyKey);
+
+        using var retryResponse = await context.Client.SendAsync(
+            retryRequest,
+            TestContext.Current.CancellationToken);
+
+        retryResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var sourcesAfterRetry = await context.Client.GetFromJsonAsync<List<SourceDto>>(
+            "/api/sources",
+            TestContext.Current.CancellationToken);
+
+        sourcesAfterRetry.Should().ContainSingle(
+            source => source.Name == "Oversized Source");
     }
 }
